@@ -10,17 +10,14 @@ th, td, h1 {
 th {
     background-color: #f2f2f2;
 }
-.search-container {
-    margin-bottom: 20px;
-}
-.search-container input {
-    margin-right: 10px;
-    padding: 8px;
-    width: 200px;
-    box-sizing: border-box;
-}
-#loadMore {
+body, html {
     width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#loadMore {
+    width: 100%; 
     margin-top: 20px;
     padding: 10px;
     background-color: #4CAF50;
@@ -30,6 +27,21 @@ th {
     cursor: pointer;
     box-sizing: border-box; 
 }
+
 #loadMore:hover {
-    background-color: #45a049;
+    background-color: #1a3b1c;
+}
+
+
+.search-container {
+    margin-bottom: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.search-container input {
+    margin-right: 10px;
+    padding: 8px;
+    width: calc(33.333% - 10px);
+    box-sizing: border-box;
 }
