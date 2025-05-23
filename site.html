@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Afficher un CSV en JavaScript</title>
+    <link rel="stylesheet" href="style_site.css">
+</head>
+<body>
+    <h1>Les entreprises françaises</h1>
+    <div class="search-container">
+        <input type="text" id="searchAPE" placeholder="Entrez un code APE...">
+        <input type="text" id="searchSIRET" placeholder="Entrez un numéro de SIRET...">
+        <input type="text" id="searchPostal" placeholder="Entrez un code postal...">
+    </div>
+    <div id="csvData"></div>
+    <button id="loadMore">Charger plus</button>
+
+    <script>
+        // Fonction pour parser le contenu CSV
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const headers = lines[0].split(',');
+            const data = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                const values = lines[i].split(',');
+                const entry = {};
+
+                for (let j = 0; j < headers.length; j++) {
+                    entry[headers[j]] = values[j];
+                }
+
+                data.push(entry);
+            }
+
+            return data;
+        }
+
+        // Fonction pour afficher les données dans une table HTML
+        function displayData(data, startIndex, endIndex) {
+            const container = document.getElementById('csvData');
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // Créer l'en-tête de la table
+            const headerRow = document.createElement('tr');
+            Object.keys(data[0]).forEach(key => {
+                const th = document.createElement('th');
+                th.textContent = key;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // Créer les lignes de la table pour les données actuelles
+            for (let i = startIndex; i < endIndex && i < data.length; i++) {
+                const entry = data[i];
+                const row = document.createElement('tr');
+                Object.values(entry).forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    row.appendChild(td);
+                });
+                tbody.appendChild(row);
+            }
+            table.appendChild(tbody);
+
+            container.appendChild(table);
+        }
+
+        // Fonction pour filtrer les données en fonction des recherches
+        function filterData(data, apeTerm, siretTerm, postalTerm) {
+            return data.filter(entry =>
+                entry.activitePrincipaleEtablissement.includes(apeTerm) &&
+                entry.siret.includes(siretTerm) &&
+                entry.codePostalEtablissement.includes(postalTerm)
+            );
+        }
+
+        // Récupérer et afficher le fichier CSV
+        fetch('http://localhost:8000/etablissements_industriels.csv')
+            .then(response => response.text())
+            .then(csvText => {
+                const data = parseCSV(csvText);
+                let currentIndex = 0;
+                const batchSize = 500;
+
+                // Afficher les premières 500 lignes
+                displayData(data, currentIndex, currentIndex + batchSize);
+                currentIndex += batchSize;
+
+                // Ajouter des écouteurs d'événement pour les champs de recherche
+                function setupSearchListeners() {
+                    document.getElementById('searchAPE').addEventListener('input', function() {
+                        currentIndex = 0;
+                        document.getElementById('csvData').innerHTML = '';
+                        const apeTerm = this.value.toUpperCase();
+                        const siretTerm = document.getElementById('searchSIRET').value.toUpperCase();
+                        const postalTerm = document.getElementById('searchPostal').value.toUpperCase();
+                        const filteredData = filterData(data, apeTerm, siretTerm, postalTerm);
+                        displayData(filteredData, currentIndex, currentIndex + batchSize);
+                        currentIndex += batchSize;
+                    });
+
+                    document.getElementById('searchSIRET').addEventListener('input', function() {
+                        currentIndex = 0;
+                        document.getElementById('csvData').innerHTML = '';
+                        const apeTerm = document.getElementById('searchAPE').value.toUpperCase();
+                        const siretTerm = this.value.toUpperCase();
+                        const postalTerm = document.getElementById('searchPostal').value.toUpperCase();
+                        const filteredData = filterData(data, apeTerm, siretTerm, postalTerm);
+                        displayData(filteredData, currentIndex, currentIndex + batchSize);
+                        currentIndex += batchSize;
+                    });
+
+                    document.getElementById('searchPostal').addEventListener('input', function() {
+                        currentIndex = 0;
+                        document.getElementById('csvData').innerHTML = '';
+                        const apeTerm = document.getElementById('searchAPE').value.toUpperCase();
+                        const siretTerm = document.getElementById('searchSIRET').value.toUpperCase();
+                        const postalTerm = this.value.toUpperCase();
+                        const filteredData = filterData(data, apeTerm, siretTerm, postalTerm);
+                        displayData(filteredData, currentIndex, currentIndex + batchSize);
+                        currentIndex += batchSize;
+                    });
+                }
+
+                setupSearchListeners();
+
+                // Ajouter un écouteur d'événement pour le bouton "Charger plus"
+                document.getElementById('loadMore').addEventListener('click', function() {
+                    const apeTerm = document.getElementById('searchAPE').value.toUpperCase();
+                    const siretTerm = document.getElementById('searchSIRET').value.toUpperCase();
+                    const postalTerm = document.getElementById('searchPostal').value.toUpperCase();
+                    const filteredData = filterData(data, apeTerm, siretTerm, postalTerm);
+                    displayData(filteredData, currentIndex, currentIndex + batchSize);
+                    currentIndex += batchSize;
+
+                    // Désactiver le bouton si toutes les données sont chargées
+                    if (currentIndex >= filteredData.length) {
+                        this.style.display = 'none';
+                    }
+                });
+            })
+            .catch(error => console.error('Erreur lors de la récupération du fichier CSV:', error));
+    </script>
+</body>
+</html>
