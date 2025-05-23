@@ -17,6 +17,11 @@
     <button id="loadMore">Charger plus</button>
 
     <script>
+        // Variables globales
+        let currentIndex = 0;
+        const batchSize = 500;
+        let data = [];
+
         // Fonction pour parser le contenu CSV
         function parseCSV(csvText) {
             const lines = csvText.split('\n');
@@ -82,20 +87,14 @@
 
         // Récupérer et afficher le fichier CSV
         fetch('etablissements_industriels.csv')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text();
-        })
-        .then(csvText => {
-            const data = parseCSV(csvText);
-            displayData(data);
-        })
-        .catch(error => console.error('Erreur lors de la récupération du fichier CSV:', error));
-
-
-                // Afficher les premières 500 lignes
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(csvText => {
+                data = parseCSV(csvText);
                 displayData(data, currentIndex, currentIndex + batchSize);
                 currentIndex += batchSize;
 
