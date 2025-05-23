@@ -81,12 +81,19 @@
         }
 
         // Récupérer et afficher le fichier CSV
-        fetch('http://localhost:8000/etablissements_industriels.csv')
-            .then(response => response.text())
-            .then(csvText => {
-                const data = parseCSV(csvText);
-                let currentIndex = 0;
-                const batchSize = 500;
+        fetch('etablissements_industriels.csv')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(csvText => {
+            const data = parseCSV(csvText);
+            displayData(data);
+        })
+        .catch(error => console.error('Erreur lors de la récupération du fichier CSV:', error));
+
 
                 // Afficher les premières 500 lignes
                 displayData(data, currentIndex, currentIndex + batchSize);
