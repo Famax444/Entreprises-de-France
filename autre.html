@@ -7,7 +7,10 @@
 </head>
 <body>
     <h1>Autres entreprises</h1>
-    <div id="autreCsvData"></div>
+    <div id="autreCsvData">
+        <button onclick="window.location.href='index.html'">Voir notre BDD</button>
+        <button id="loadMore">Charger plus</button>
+    </div>
 
     <script>
         function parseCSV(csvText) {
@@ -62,6 +65,20 @@
             .then(csvText => {
                 const data = parseCSV(csvText);
                 displayData(data);
+            })
+        
+        document.getElementById('loadMore').addEventListener('click', function () {
+                    const apeTerm = document.getElementById('searchAPE').value.toUpperCase();
+                    const siretTerm = document.getElementById('searchSIRET').value.toUpperCase();
+                    const postalTerm = document.getElementById('searchPostal').value.toUpperCase();
+                    const filteredData = filterData(data, apeTerm, siretTerm, postalTerm);
+                    displayData(filteredData, currentIndex, currentIndex + batchSize);
+                    currentIndex += batchSize;
+
+                    if (currentIndex >= filteredData.length) {
+                        this.style.display = 'none';
+                    }
+                });
             })
             .catch(error => console.error('Erreur CSV autre fichier :', error));
     </script>
