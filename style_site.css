@@ -50,3 +50,17 @@ body, html {
     width: calc(33.333% - 50px);
     box-sizing: border-box;
 }
+
+#autreCsvData {
+    overflow-x: auto;
+    max-width: 100vw;
+}
+#autreCsvData table {
+    min-width: max-content;
+    border-collapse: collapse;
+}
+#autreCsvData th, #autreCsvData td {
+    border: 1px solid #ccc;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
