@@ -5,7 +5,7 @@ table {
 th, td, h1 {
     border: 1px solid #ddd;
     padding: 8px;
-    text-align: center; /* Centrer le texte */
+    text-align: center; 
 }
 th {
     background-color: #f2f2f2;
@@ -33,6 +33,9 @@ body, html {
     background-color: #2d6e3f;
 }
 
+#csvData{
+    text-align: center; 
+}
 
 .search-container {
     margin-bottom: 20px;
