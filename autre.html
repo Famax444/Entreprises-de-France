@@ -12,14 +12,19 @@
     </div>
 
     <script>
+        function detectSeparator(line) {
+            const commaCount = (line.match(/,/g) || []).length;
+            const semicolonCount = (line.match(/;/g) || []).length;
+            return semicolonCount > commaCount ? ';' : ',';
+        }
         function parseCSV(csvText) {
-            const lines = csvText.split('\n');
-            const headers = lines[0].split(',');
+            const lines = csvText.split('\n').filter(line => line.trim() !== '');
+            const separator = detectSeparator(lines[0]);
+            const headers = lines[0].split(separator);
             const data = [];
 
             for (let i = 1; i < lines.length; i++) {
-                if (lines[i].trim() === '') continue;
-                const values = lines[i].split(',');
+                const values = lines[i].split(separator);
                 const entry = {};
                 for (let j = 0; j < headers.length; j++) {
                     entry[headers[j]] = values[j];
@@ -63,9 +68,12 @@
             .then(response => response.text())
             .then(csvText => {
                 const data = parseCSV(csvText);
-                displayData(data);
+                if (data.length > 0) {
+                    displayData(data);
+                } else {
+                    console.warn("Le fichier CSV est vide ou mal formaté.");
+                }
             })
-        
             .catch(error => console.error('Erreur CSV autre fichier :', error));
     </script>
 </body>
