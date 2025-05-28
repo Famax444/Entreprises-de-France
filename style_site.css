@@ -34,7 +34,8 @@ body, html {
 }
 
 #csvData{
-    text-align: center; 
+    display: block;
+    margin : auto;
 }
 
 .search-container {
