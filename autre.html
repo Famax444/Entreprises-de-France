@@ -72,12 +72,23 @@
         }
         
         function sortByColumn(colIndex) {
-            // Alterne entre tri croissant et décroissant
             sortOrder[colIndex] = !sortOrder[colIndex];
         
             const sorted = currentData.slice(1).sort((a, b) => {
-                const valA = normalize(a[colIndex] || '');
-                const valB = normalize(b[colIndex] || '');
+                const rawA = a[colIndex] || '';
+                const rawB = b[colIndex] || '';
+        
+                const valA = normalize(rawA);
+                const valB = normalize(rawB);
+        
+                const isEmptyA = valA === '';
+                const isEmptyB = valB === '';
+        
+                // Les champs vides vont toujours à la fin
+                if (isEmptyA && !isEmptyB) return 1;
+                if (!isEmptyA && isEmptyB) return -1;
+                if (isEmptyA && isEmptyB) return 0;
+        
                 if (valA < valB) return sortOrder[colIndex] ? -1 : 1;
                 if (valA > valB) return sortOrder[colIndex] ? 1 : -1;
                 return 0;
@@ -85,6 +96,7 @@
         
             displayData([currentData[0], ...sorted]);
         }
+
 
         fetch('OSINT.csv')
             .then(response => response.text())
