@@ -9,10 +9,14 @@
 <body>
     <h1>Autres entreprises</h1>
     <div id="autreCsvData">
-        <button id="change" onclick="window.location.href='index.html'">Voir les entreprises françaises</button>
+        <button onclick="window.location.href='index.html'">Voir les entreprises françaises</button>
     </div>
 
     <script>
+        function isEmptyRow(row) {
+            return row.every(cell => !cell || cell.trim() === '');
+        }
+
         function displayData(data) {
             const container = document.getElementById('autreCsvData');
             const table = document.createElement('table');
@@ -29,8 +33,10 @@
             thead.appendChild(headerRow);
             table.appendChild(thead);
 
-            // Lignes
+            // Lignes filtrées
             for (let i = 1; i < data.length; i++) {
+                if (isEmptyRow(data[i])) continue; // Ignore ligne vide/nulle
+
                 const row = document.createElement('tr');
                 data[i].forEach(value => {
                     const td = document.createElement('td');
