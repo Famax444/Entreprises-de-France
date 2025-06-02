@@ -16,13 +16,13 @@
 </head>
 <body>
     <h1>Autres entreprises</h1>
-    <div id="autreCsvData">
-        <button onclick="window.location.href='index.html'">Voir les entreprises françaises</button>
-    </div>
+    <div id="autreCsvData"></div>
+    <button onclick="window.location.href='index.html'">Voir les entreprises françaises</button>
+    
 
     <script>
         let currentData = [];
-        let sortOrder = {}; // mémorise l'ordre de tri par colonne
+        let sortOrder = {}; 
 
         function isEmptyRow(row) {
             return row.every(cell => !cell || cell.trim() === '');
@@ -50,7 +50,7 @@
             thead.appendChild(headerRow);
             table.appendChild(thead);
 
-            // Corps du tableau
+            
             for (let i = 1; i < data.length; i++) {
                 if (isEmptyRow(data[i])) continue;
 
