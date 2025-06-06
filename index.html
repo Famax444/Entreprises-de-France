@@ -49,21 +49,41 @@
             const thead = document.createElement('thead');
             const tbody = document.createElement('tbody');
 
+            // Colonnes à afficher
+            const columns = [
+                    "siret",
+                    "statutDiffusionEtablissement",
+                    "codePostalEtablissement",
+                    "etablissementSiege",
+                    "activitePrincipaleRegistreMetiersEtablissement",
+                    "trancheEffectifsEtablissement"
+                ];
+
+            // En-tête
             const headerRow = document.createElement('tr');
-            Object.keys(data[0]).forEach(key => {
+            const headerLabels = [
+                'SIRET',
+                'Nom de l\'entreprise',,
+                'Code postal',
+                'Siège',
+                'Activité',
+                'Effectif'
+            ];
+            headerLabels.forEach(label => {
                 const th = document.createElement('th');
-                th.textContent = key;
+                th.textContent = label;
                 headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
             table.appendChild(thead);
 
+            // Lignes
             for (let i = startIndex; i < endIndex && i < data.length; i++) {
                 const entry = data[i];
                 const row = document.createElement('tr');
-                Object.values(entry).forEach(value => {
+                columns.forEach(col => {
                     const td = document.createElement('td');
-                    td.textContent = value;
+                    td.textContent = entry[col] || '';
                     row.appendChild(td);
                 });
                 tbody.appendChild(row);
@@ -75,9 +95,9 @@
 
         function filterData(data, apeTerm, siretTerm, postalTerm) {
             return data.filter(entry =>
-                entry.activitePrincipaleEtablissement.includes(apeTerm) &&
-                entry.siret.includes(siretTerm) &&
-                entry.codePostalEtablissement.includes(postalTerm)
+                (entry.activitePrincipaleEtablissement || '').toUpperCase().includes(apeTerm) &&
+                (entry.siret || '').toUpperCase().includes(siretTerm) &&
+                (entry.codePostalEtablissement || '').toUpperCase().includes(postalTerm)
             );
         }
 
