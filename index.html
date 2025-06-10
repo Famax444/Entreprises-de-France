@@ -46,11 +46,11 @@
         // Colonnes à afficher et leurs labels
         const columns = [
             { key: "siret", label: "SIRET" },
-            { key: "denominationUniteLegale", label: "Nom de l'établissement" },
+            { key: "nom_etablissement", label: "Nom de l'établissement" },
             { key: "libelleCommuneEtablissement", label: "Ville" },
             { key: "codePostalEtablissement", label: "Code postal" },
-            { key: "activitePrincipaleUniteLegale", label: "Activité" },
-            { key: "effectif", label: "Effectif" }
+            { key: "activitePrincipaleEtablissement", label: "Activité" },
+            { key: "trancheEffectifsEtablissement", label: "Effectif" }
         ];
 
 
@@ -133,6 +133,21 @@
                 // Fusionne les colonnes de nom si besoin
                 data.forEach(entry => {
                     entry.nom_etablissement = entry.denominationUniteLegale || entry.nomUniteLegale || '';
+                });
+
+                // Filtrer uniquement les entreprises actives
+                data = data.filter(entry => entry.etatAdministratifEtablissement === "A");
+
+                // Nettoyer les NaN et valeurs nulles
+                data = data.map(entry => {
+                    let cleaned = {};
+                    for (const col of columns) {
+                        let val = entry[col.key];
+                        cleaned[col.key] = (val && val !== "NaN") ? val : "";
+                    }
+                    // On garde aussi les champs nécessaires pour le tri
+                    cleaned.etatAdministratifEtablissement = entry.etatAdministratifEtablissement;
+                    return cleaned;
                 });
 
                 sortAndDisplay();
