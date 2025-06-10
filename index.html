@@ -138,20 +138,7 @@
                 // Filtrer uniquement les entreprises actives
                 data = data.filter(entry => entry.etatAdministratifEtablissement === "A");
 
-                // Nettoyer les NaN et valeurs nulles
-                data = data.map(entry => {
-                    let cleaned = {};
-                    for (const col of columns) {
-                        let val = entry[col.key];
-                        cleaned[col.key] = (val && val !== "NaN") ? val : "";
-                    }
-                    // On garde aussi les champs nécessaires pour le tri
-                    cleaned.etatAdministratifEtablissement = entry.etatAdministratifEtablissement;
-                    return cleaned;
-                });
-
-                sortAndDisplay();
-
+                
                 document.getElementById('loadMore').style.display = 'none'; // Cache le bouton "Charger plus"
             })
             .catch(error => console.error('Erreur lors de la récupération du fichier CSV:', error));
