@@ -75,9 +75,9 @@
 
         function filterData(data, apeTerm, siretTerm, postalTerm) {
             return data.filter(entry =>
-                entry.activitePrincipaleEtablissement.includes(apeTerm) &&
-                entry.siret.includes(siretTerm) &&
-                entry.codePostalEtablissement.includes(postalTerm)
+                (entry.activitePrincipaleRegistreMetiersEtablissement || '').toUpperCase().includes(apeTerm) &&
+                (entry.siret || '').toUpperCase().includes(siretTerm) &&
+                (entry.codePostalEtablissement || '').toUpperCase().includes(postalTerm)
             );
         }
 
