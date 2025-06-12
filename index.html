@@ -43,54 +43,27 @@
             return data;
         }
 
-        // Colonnes à afficher et leurs labels
-        const columns = [
-            { key: "siret", label: "SIRET" },
-            { key: "statutDiffusionEtablissement", label: "Statut diffusion" },
-            { key: "codePostalEtablissement", label: "Code postal" },
-            { key: "etablissementSiege", label: "Siège" },
-            { key: "activitePrincipaleRegistreMetiersEtablissement", label: "Activité principale RM" },
-            { key: "trancheEffectifsEtablissement", label: "Tranche effectifs" },
-        ];
-
-
-        let sortColumn = null;
-        let sortAsc = true;
-
         function displayData(data, startIndex, endIndex) {
             const container = document.getElementById('csvData');
-            container.innerHTML = '';
             const table = document.createElement('table');
             const thead = document.createElement('thead');
             const tbody = document.createElement('tbody');
 
-            // En-tête cliquable
             const headerRow = document.createElement('tr');
-            columns.forEach((col, idx) => {
+            Object.keys(data[0]).forEach(key => {
                 const th = document.createElement('th');
-                th.textContent = col.label;
-                th.style.cursor = 'pointer';
-                th.onclick = function () {
-                    if (sortColumn === col.key) {
-                        sortAsc = !sortAsc;
-                    } else {
-                        sortColumn = col.key;
-                        sortAsc = true;
-                    }
-                    sortAndDisplay();
-                };
+                th.textContent = key;
                 headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
             table.appendChild(thead);
 
-            // Lignes
             for (let i = startIndex; i < endIndex && i < data.length; i++) {
                 const entry = data[i];
                 const row = document.createElement('tr');
-                columns.forEach(col => {
+                Object.values(entry).forEach(value => {
                     const td = document.createElement('td');
-                    td.textContent = entry[col.key] || '';
+                    td.textContent = value;
                     row.appendChild(td);
                 });
                 tbody.appendChild(row);
@@ -100,25 +73,11 @@
             container.appendChild(table);
         }
 
-        function sortAndDisplay() {
-            let sortedData = [...data];
-            if (sortColumn) {
-                sortedData.sort((a, b) => {
-                    const valA = (a[sortColumn] || '').toUpperCase();
-                    const valB = (b[sortColumn] || '').toUpperCase();
-                    if (valA < valB) return sortAsc ? -1 : 1;
-                    if (valA > valB) return sortAsc ? 1 : -1;
-                    return 0;
-                });
-            }
-            displayData(sortedData, 0, batchSize);
-        }
-
         function filterData(data, apeTerm, siretTerm, postalTerm) {
             return data.filter(entry =>
-                (entry.activitePrincipaleEtablissement || '').toUpperCase().includes(apeTerm) &&
-                (entry.siret || '').toUpperCase().includes(siretTerm) &&
-                (entry.codePostalEtablissement || '').toUpperCase().includes(postalTerm)
+                entry.activitePrincipaleEtablissement.includes(apeTerm) &&
+                entry.siret.includes(siretTerm) &&
+                entry.codePostalEtablissement.includes(postalTerm)
             );
         }
 
@@ -129,17 +88,38 @@
             })
             .then(csvText => {
                 data = parseCSV(csvText);
+                displayData(data, currentIndex, currentIndex + batchSize);
+                currentIndex += batchSize;
 
-                // Fusionne les colonnes de nom si besoin
-                data.forEach(entry => {
-                    entry.nom_etablissement = entry.denominationUniteLegale || entry.nomUniteLegale || '';
+                function setupSearchListeners() {
+                    ['searchAPE', 'searchSIRET', 'searchPostal'].forEach(id => {
+                        document.getElementById(id).addEventListener('input', function () {
+                            currentIndex = 0;
+                            document.getElementById('csvData').innerHTML = '';
+                            const apeTerm = document.getElementById('searchAPE').value.toUpperCase();
+                            const siretTerm = document.getElementById('searchSIRET').value.toUpperCase();
+                            const postalTerm = document.getElementById('searchPostal').value.toUpperCase();
+                            const filteredData = filterData(data, apeTerm, siretTerm, postalTerm);
+                            displayData(filteredData, currentIndex, currentIndex + batchSize);
+                            currentIndex += batchSize;
+                        });
+                    });
+                }
+
+                setupSearchListeners();
+
+                document.getElementById('loadMore').addEventListener('click', function () {
+                    const apeTerm = document.getElementById('searchAPE').value.toUpperCase();
+                    const siretTerm = document.getElementById('searchSIRET').value.toUpperCase();
+                    const postalTerm = document.getElementById('searchPostal').value.toUpperCase();
+                    const filteredData = filterData(data, apeTerm, siretTerm, postalTerm);
+                    displayData(filteredData, currentIndex, currentIndex + batchSize);
+                    currentIndex += batchSize;
+
+                    if (currentIndex >= filteredData.length) {
+                        this.style.display = 'none';
+                    }
                 });
-
-                // Filtrer uniquement les entreprises actives
-                data = data.filter(entry => entry.etatAdministratifEtablissement === "A");
-
-                
-                document.getElementById('loadMore').style.display = 'none'; // Cache le bouton "Charger plus"
             })
             .catch(error => console.error('Erreur lors de la récupération du fichier CSV:', error));
     </script>
