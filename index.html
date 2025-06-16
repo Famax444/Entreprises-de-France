@@ -1,127 +1,259 @@
 <!DOCTYPE html>
+More actions
+
 <html lang="fr">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Les entreprises françaises</title>
+
     <link rel="stylesheet" href="style_site.css">
+
 </head>
+
 <body>
+
     <h1>Les entreprises françaises</h1>
+
     <div class="search-container">
+
         <input type="text" id="searchAPE" placeholder="Entrez un code APE...">
+
         <input type="text" id="searchSIRET" placeholder="Entrez un numéro de SIRET...">
+
         <input type="text" id="searchPostal" placeholder="Entrez un code postal...">
+
     </div>
+
     <div id="csvData"></div>
-     <div id="autreCsvData"><button id="change" onclick="window.location.href='autre.html'">Voir notre BDD</button></div>
+
+
+     <div id="autreCsvData"></div>
+
     <button id="loadMore">Charger plus</button>
+
+
+    <button id="change" onclick="window.location.href='autre.html'">Voir notre BDD</button>
+
+
     
- 
+
+
+
+
 
     <script>
+
         let currentIndex = 0;
+
         const batchSize = 500;
+
         let data = [];
 
+
+
         function parseCSV(csvText) {
+
             const lines = csvText.split('\n');
+
             const headers = lines[0].split(',');
+
             const data = [];
 
+
+
             for (let i = 1; i < lines.length; i++) {
+
                 if (lines[i].trim() === '') continue;
+
                 const values = lines[i].split(',');
+
                 const entry = {};
 
+
+
                 for (let j = 0; j < headers.length; j++) {
+
                     entry[headers[j]] = values[j];
+
                 }
+
                 data.push(entry);
+
             }
+
+
 
             return data;
+
         }
+
+
 
         function displayData(data, startIndex, endIndex) {
+
             const container = document.getElementById('csvData');
+
             const table = document.createElement('table');
+
             const thead = document.createElement('thead');
+
             const tbody = document.createElement('tbody');
 
+
+
             const headerRow = document.createElement('tr');
+
             Object.keys(data[0]).forEach(key => {
+
                 const th = document.createElement('th');
+
                 th.textContent = key;
+
                 headerRow.appendChild(th);
+
             });
+
             thead.appendChild(headerRow);
+
             table.appendChild(thead);
 
+
+
             for (let i = startIndex; i < endIndex && i < data.length; i++) {
+
                 const entry = data[i];
+
                 const row = document.createElement('tr');
+
                 Object.values(entry).forEach(value => {
+
                     const td = document.createElement('td');
+
                     td.textContent = value;
+
                     row.appendChild(td);
+
                 });
+
                 tbody.appendChild(row);
+
             }
+
             table.appendChild(tbody);
 
+
+
             container.appendChild(table);
+
         }
+
+
 
         function filterData(data, apeTerm, siretTerm, postalTerm) {
+
             return data.filter(entry =>
-                (entry.activitePrincipaleRegistreMetiersEtablissement || '').toUpperCase().includes(apeTerm) &&
-                (entry.siret || '').toUpperCase().includes(siretTerm) &&
-                (entry.codePostalEtablissement || '').toUpperCase().includes(postalTerm)
+
+                entry.activitePrincipaleEtablissement.includes(apeTerm) &&
+
+                entry.siret.includes(siretTerm) &&
+
+                entry.codePostalEtablissement.includes(postalTerm)
+
             );
+
         }
 
+
+
         fetch('etablissements_industriels.csv')
+
             .then(response => {
+
                 if (!response.ok) throw new Error('Erreur réseau');
+
                 return response.text();
+
             })
+
             .then(csvText => {
+
                 data = parseCSV(csvText);
+
                 displayData(data, currentIndex, currentIndex + batchSize);
+
                 currentIndex += batchSize;
 
+
+
                 function setupSearchListeners() {
+
                     ['searchAPE', 'searchSIRET', 'searchPostal'].forEach(id => {
+
                         document.getElementById(id).addEventListener('input', function () {
+
                             currentIndex = 0;
+
                             document.getElementById('csvData').innerHTML = '';
+
                             const apeTerm = document.getElementById('searchAPE').value.toUpperCase();
+
                             const siretTerm = document.getElementById('searchSIRET').value.toUpperCase();
+
                             const postalTerm = document.getElementById('searchPostal').value.toUpperCase();
+
                             const filteredData = filterData(data, apeTerm, siretTerm, postalTerm);
+
                             displayData(filteredData, currentIndex, currentIndex + batchSize);
+
                             currentIndex += batchSize;
+
                         });
+
                     });
+
                 }
+
+
 
                 setupSearchListeners();
 
+
+
                 document.getElementById('loadMore').addEventListener('click', function () {
+
                     const apeTerm = document.getElementById('searchAPE').value.toUpperCase();
+
                     const siretTerm = document.getElementById('searchSIRET').value.toUpperCase();
+
                     const postalTerm = document.getElementById('searchPostal').value.toUpperCase();
+
                     const filteredData = filterData(data, apeTerm, siretTerm, postalTerm);
+
                     displayData(filteredData, currentIndex, currentIndex + batchSize);
+
                     currentIndex += batchSize;
 
+
+
                     if (currentIndex >= filteredData.length) {
+
                         this.style.display = 'none';
+
                     }
+
                 });
+
             })
+
             .catch(error => console.error('Erreur lors de la récupération du fichier CSV:', error));
+
     </script>
+
 </body>
+
 </html>
